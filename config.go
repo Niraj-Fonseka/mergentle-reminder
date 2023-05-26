@@ -20,11 +20,13 @@ type Config struct {
 }
 
 type ConfigGroup struct {
-	ID int `yaml:"id"`
+	ID           int `yaml:"id"`
+	SlackWebhook int `yaml:"slack_webhook"`
 }
 
 type ConfigProject struct {
-	ID int `yaml:"id"`
+	ID           int `yaml:"id"`
+	SlackWebhook int `yaml:"slack_webhook"`
 }
 
 type Env interface {

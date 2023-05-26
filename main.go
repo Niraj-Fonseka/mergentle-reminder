@@ -40,14 +40,15 @@ func main() {
 
 	summary := formatMergeRequestsSummary(mrs)
 
-	slackClient := &slackClient{webhookURL: os.Getenv("SLACK_WEBHOOK_URL")}
-	err = sendSlackMessage(slackClient, summary)
-	if err != nil {
-		fmt.Printf("Error sending Slack message: %v\n", err)
-		os.Exit(1)
-	}
+	fmt.Println(summary)
+	// slackClient := &slackClient{webhookURL: os.Getenv("SLACK_WEBHOOK_URL")}
+	// err = sendSlackMessage(slackClient, summary)
+	// if err != nil {
+	// 	fmt.Printf("Error sending Slack message: %v\n", err)
+	// 	os.Exit(1)
+	// }
 
-	fmt.Println("Successfully sent merge request summary to Slack.")
+	// fmt.Println("Successfully sent merge request summary to Slack.")
 }
 
 func readConfig(file string) (*Config, error) {
