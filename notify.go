@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/slack-go/slack"
@@ -73,22 +74,42 @@ func (r *notify) sendSlackMessage(webhook, message string) error {
 func (r *notify) formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) string {
 	var summary string
 
-	if len(mrs) == 0 {
-		return ":tada: There are no open merge requests ! :tada:"
-	}
+	//mrs to projects
+	mrsProjects := make(map[int][]*MergeRequestWithApprovals, 0)
 
 	for _, mr := range mrs {
-		approvedBy := strings.Join(mr.ApprovedBy, ", ")
-		if approvedBy == "" {
-			approvedBy = "None"
+		_, ok := mrsProjects[mr.MergeRequest.ProjectID]
+		if ok {
+			mrsProjects[mr.MergeRequest.ProjectID] = append(mrsProjects[mr.MergeRequest.ProjectID], mr)
+		} else {
+			mrsProjects[mr.MergeRequest.ProjectID] = []*MergeRequestWithApprovals{mr}
+		}
+	}
+
+	for gitlabProjectID, mrs := range mrsProjects {
+		projectName, err := r.gitlab.GetProject(gitlabProjectID)
+		if err != nil {
+			log.Println(err)
+			continue
 		}
 
-		createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
+		if len(mrs) == 0 {
+			return fmt.Sprintf(":tada: There are no open merge requests for %s ! :tada:", projectName)
+		}
 
-		summary += fmt.Sprintf(
-			":arrow_forward: <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
-			mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
-		)
+		for _, mr := range mrs {
+			approvedBy := strings.Join(mr.ApprovedBy, ", ")
+			if approvedBy == "" {
+				approvedBy = "None"
+			}
+
+			createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
+
+			summary += fmt.Sprintf(
+				":arrow_forward: %s <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
+				projectName, mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
+			)
+		}
 	}
 
 	return summary
