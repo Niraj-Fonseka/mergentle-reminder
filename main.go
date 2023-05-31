@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/xanzy/go-gitlab"
 	"gopkg.in/yaml.v2"
@@ -26,29 +25,17 @@ func main() {
 	}
 
 	gitlabClient := &gitLabClient{client: glClient}
+	slackClient := &slackClient{webhookURL: os.Getenv("SLACK_WEBHOOK_URL")}
 
-	mrs, err := fetchOpenedMergeRequests(config, gitlabClient)
-	if err != nil {
-		fmt.Printf("Error fetching opened merge requests: %v\n", err)
-		os.Exit(1)
-	}
+	notify := &notify{gitlab: gitlabClient, slack: slackClient, config: config}
 
-	if len(mrs) == 0 {
-		fmt.Println("No opened merge requests found.")
-		os.Exit(0)
-	}
-
-	summary := formatMergeRequestsSummary(mrs)
-
-	fmt.Println(summary)
-	// slackClient := &slackClient{webhookURL: os.Getenv("SLACK_WEBHOOK_URL")}
-	// err = sendSlackMessage(slackClient, summary)
-	// if err != nil {
-	// 	fmt.Printf("Error sending Slack message: %v\n", err)
-	// 	os.Exit(1)
+	// job := func() {
+	// 	remind.notify()
 	// }
+	//scheduler.Every().Day().Run(job)
+	notify.notify()
 
-	// fmt.Println("Successfully sent merge request summary to Slack.")
+	select {}
 }
 
 func readConfig(file string) (*Config, error) {
@@ -66,21 +53,21 @@ func readConfig(file string) (*Config, error) {
 	return &config, nil
 }
 
-func formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) string {
-	var summary string
-	for _, mr := range mrs {
-		approvedBy := strings.Join(mr.ApprovedBy, ", ")
-		if approvedBy == "" {
-			approvedBy = "None"
-		}
+// func formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) string {
+// 	var summary string
+// 	for _, mr := range mrs {
+// 		approvedBy := strings.Join(mr.ApprovedBy, ", ")
+// 		if approvedBy == "" {
+// 			approvedBy = "None"
+// 		}
 
-		createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
+// 		createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
 
-		summary += fmt.Sprintf(
-			":arrow_forward: <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
-			mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
-		)
-	}
+// 		summary += fmt.Sprintf(
+// 			":arrow_forward: <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
+// 			mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
+// 		)
+// 	}
 
-	return summary
-}
+// 	return summary
+// }

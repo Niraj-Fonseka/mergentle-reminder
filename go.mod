@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/carlescere/scheduler v0.0.0-20170109141437-ee74d2f83d82 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect

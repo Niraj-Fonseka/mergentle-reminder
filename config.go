@@ -12,21 +12,18 @@ type Config struct {
 		URL   string `yaml:"url"`
 		Token string `yaml:"token"`
 	} `yaml:"gitlab"`
-	Slack struct {
-		WebhookURL string `yaml:"webhook_url"`
-	} `yaml:"slack"`
 	Projects []ConfigProject
 	Groups   []ConfigGroup
 }
 
 type ConfigGroup struct {
-	ID           int `yaml:"id"`
-	SlackWebhook int `yaml:"slack_webhook"`
+	ID           int    `yaml:"id"`
+	SlackWebhook string `yaml:"slack_webhook"`
 }
 
 type ConfigProject struct {
-	ID           int `yaml:"id"`
-	SlackWebhook int `yaml:"slack_webhook"`
+	ID           int    `yaml:"id"`
+	SlackWebhook string `yaml:"slack_webhook"`
 }
 
 type Env interface {
@@ -83,14 +80,6 @@ func loadConfig(env Env) (*Config, error) {
 	}
 	if config.GitLab.Token == "" {
 		return nil, fmt.Errorf("GITLAB_TOKEN environment variable is required")
-	}
-
-	slackWebhookURL := env.Getenv("SLACK_WEBHOOK_URL")
-	if slackWebhookURL != "" {
-		config.Slack.WebhookURL = slackWebhookURL
-	}
-	if config.Slack.WebhookURL == "" {
-		return nil, fmt.Errorf("SLACK_WEBHOOK_URL environment variable is required")
 	}
 
 	if len(config.Projects) == 0 && len(config.Groups) == 0 {
