@@ -25,7 +25,7 @@ func main() {
 	}
 
 	gitlabClient := &gitLabClient{client: glClient}
-	slackClient := &slackClient{webhookURL: os.Getenv("SLACK_WEBHOOK_URL")}
+	slackClient := &slackClient{}
 
 	notify := &notify{gitlab: gitlabClient, slack: slackClient, config: config}
 

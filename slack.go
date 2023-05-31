@@ -8,16 +8,8 @@ type SlackClient interface {
 }
 
 type slackClient struct {
-	webhookURL string
 }
 
-func (c *slackClient) PostWebhook(payload *slack.WebhookMessage) error {
-	return slack.PostWebhook(c.webhookURL, payload)
-}
-
-func sendSlackMessage(client SlackClient, message string) error {
-	msg := slack.WebhookMessage{
-		Text: message,
-	}
-	return client.PostWebhook(&msg)
+func (c *slackClient) PostWebhook(webhook string, payload *slack.WebhookMessage) error {
+	return slack.PostWebhook(webhook, payload)
 }

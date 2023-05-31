@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/slack-go/slack"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -59,7 +60,14 @@ func (r *notify) notify() {
 }
 
 func (r *notify) slackNotify(slackWebhook, summary string) error {
-	return sendSlackMessage(r.slack, summary)
+	return r.sendSlackMessage(slackWebhook, summary)
+}
+
+func (r *notify) sendSlackMessage(webhook, message string) error {
+	msg := slack.WebhookMessage{
+		Text: message,
+	}
+	return r.slack.PostWebhook(webhook, &msg)
 }
 
 func (r *notify) formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) string {
