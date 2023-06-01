@@ -52,22 +52,3 @@ func readConfig(file string) (*Config, error) {
 
 	return &config, nil
 }
-
-// func formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) string {
-// 	var summary string
-// 	for _, mr := range mrs {
-// 		approvedBy := strings.Join(mr.ApprovedBy, ", ")
-// 		if approvedBy == "" {
-// 			approvedBy = "None"
-// 		}
-
-// 		createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
-
-// 		summary += fmt.Sprintf(
-// 			":arrow_forward: <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
-// 			mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
-// 		)
-// 	}
-
-// 	return summary
-// }

@@ -34,3 +34,7 @@ func (c *gitLabClient) ListProjectMergeRequests(projectID int, options *gitlab.L
 func (c *gitLabClient) GetMergeRequestApprovalsConfiguration(projectID int, mergeRequestID int) (*gitlab.MergeRequestApprovals, *gitlab.Response, error) {
 	return c.client.MergeRequestApprovals.GetConfiguration(projectID, mergeRequestID)
 }
+
+func (c *gitLabClient) GetProject(projectID int, opt *gitlab.GetProjectOptions) (*gitlab.Project, *gitlab.Response, error) {
+	return c.client.Projects.GetProject(projectID, opt)
+}

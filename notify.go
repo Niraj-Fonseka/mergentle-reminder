@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/slack-go/slack"
 	"github.com/xanzy/go-gitlab"
@@ -87,14 +88,14 @@ func (r *notify) formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) st
 	}
 
 	for gitlabProjectID, mrs := range mrsProjects {
-		projectName, err := r.gitlab.GetProject(gitlabProjectID)
+		project, _, err := r.gitlab.GetProject(gitlabProjectID, &gitlab.GetProjectOptions{})
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
 		if len(mrs) == 0 {
-			return fmt.Sprintf(":tada: There are no open merge requests for %s ! :tada:", projectName)
+			return fmt.Sprintf(":tada: There are no open merge requests for %s ! :tada:", project.Name)
 		}
 
 		for _, mr := range mrs {
@@ -105,9 +106,17 @@ func (r *notify) formatMergeRequestsSummary(mrs []*MergeRequestWithApprovals) st
 
 			createdAtStr := mr.MergeRequest.CreatedAt.Format("2 January 2006, 15:04 MST")
 
+			timeSinceCreated := time.Since(*mr.MergeRequest.CreatedAt).Hours() / 24
+
+			duration := ""
+			if timeSinceCreated <= 1 {
+				duration = fmt.Sprintf("%.2f hours", time.Since(*mr.MergeRequest.CreatedAt).Hours())
+			} else {
+				duration = fmt.Sprintf("%.2f days", timeSinceCreated)
+			}
 			summary += fmt.Sprintf(
-				":arrow_forward: %s <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Approved by:* %s\n\n",
-				projectName, mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, approvedBy,
+				":arrow_forward: _%s_ : <%s|%s>\n*Author:* %s\n*Created at:* %s\n*Duration:* %s\n*Approved by:* %s\n\n",
+				project.Name, mr.MergeRequest.WebURL, mr.MergeRequest.Title, mr.MergeRequest.Author.Name, createdAtStr, duration, approvedBy,
 			)
 		}
 	}
